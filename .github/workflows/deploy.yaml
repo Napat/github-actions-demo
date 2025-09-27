@@ -12,11 +12,20 @@ on:
     types:
       - opened
 
+#env:
+#  APP_VERSION: v1.0.0
+
 jobs:
   build:
     name: Build Project
     runs-on: ubuntu-latest
     steps:
+      - name: Echo env hello text
+        run: |
+          echo "ENV hello text: ${{ vars.HELLO_TEST }}"
+      - name: Echo Secret api key
+        run: |
+          echo "Secret API Key: ${{ secrets.API_KEY }}"
       - name: Checkout code
         uses: actions/checkout@v5
       - name: Setup Node.js
