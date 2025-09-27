@@ -1,7 +1,11 @@
 name: Deploy React CSR
 on:
-  push:
+  # push:
   workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+
 jobs:
   lint:
     name: Lint Code Base
