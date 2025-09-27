@@ -58,11 +58,21 @@ jobs:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
     needs: build
+    # 1. เพิ่มเงื่อนไขให้ job นี้ทำงานเฉพาะ branch ที่ต้องการ deploy เท่านั้น
+    if: github.ref_name == 'master' || github.ref_name == 'release' || github.ref_name == 'develop'
+
+    # 2. กำหนด environment แบบไดนามิกตามชื่อ branch
+    environment:
+      name: ${{ (github.ref_name == 'master' && 'PRD') || (github.ref_name == 'release' && 'UAT') || (github.ref_name == 'develop' && 'SIT') }}
+
     steps:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
           name: dist-artifacts
           path: ./dist
-      - name: Deploy to xxx
-        run: echo "Deploying to xxx..."
+      - name: Deploy to ${{ (github.ref_name == 'master' && 'PRD') || (github.ref_name == 'release' && 'UAT') || (github.ref_name == 'develop' && 'SIT') }}
+        run: |
+          echo "Deploying to ${{ (github.ref_name == 'master' && 'PRD') || (github.ref_name == 'release' && 'UAT') || (github.ref_name == 'develop' && 'SIT') }}..."
+          echo "Using variable: ${{ vars.LOWEST_APP_VERSION }}"
+          echo "Using secret: ${{ secrets.REDIS_TOKEN }}"
