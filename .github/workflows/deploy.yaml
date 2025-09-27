@@ -2,7 +2,7 @@ name: Deploy React CSR
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
   pull_request:
     types:
