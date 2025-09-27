@@ -54,16 +54,40 @@ jobs:
           name: dist-artifacts
           path: ./dist
 
+  prepare:
+    name: Prepare TARGET_ENV
+    runs-on: ubuntu-latest
+    needs: build
+    outputs:
+      TARGET_ENV: ${{ steps.set-target.outputs.target }}
+    steps:
+      - name: Compute TARGET_ENV
+        id: set-target
+        run: |
+          echo "Computing TARGET_ENV for ref: $GITHUB_REF_NAME"
+          if [[ "$GITHUB_REF_NAME" == "master" ]]; then
+            echo "target=PRD" >> $GITHUB_OUTPUT
+          elif [[ "$GITHUB_REF_NAME" == "release" ]]; then
+            echo "target=UAT" >> $GITHUB_OUTPUT
+          elif [[ "$GITHUB_REF_NAME" == "develop" ]]; then
+            echo "target=SIT" >> $GITHUB_OUTPUT
+          else
+            echo "target=" >> $GITHUB_OUTPUT
+          fi
+
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
-    needs: build
-    # 1. เพิ่มเงื่อนไขให้ job นี้ทำงานเฉพาะ branch ที่ต้องการ deploy เท่านั้น
-    if: github.ref_name == 'master' || github.ref_name == 'release' || github.ref_name == 'develop'
+    needs: [build, prepare]
 
-    # 2. กำหนด environment แบบไดนามิกตามชื่อ branch
+    # job นี้ทำงานเฉพาะเมื่อ prepare คืนค่า TARGET_ENV ที่ไม่ว่าง
+    if: needs.prepare.outputs.TARGET_ENV != ''
+
+    env:
+      TARGET_ENV: ${{ needs.prepare.outputs.TARGET_ENV }}
+
     environment:
-      name: ${{ (github.ref_name == 'master' && 'PRD') || (github.ref_name == 'release' && 'UAT') || (github.ref_name == 'develop' && 'SIT') }}
+      name: ${{ needs.prepare.outputs.TARGET_ENV }}
 
     steps:
       - name: Download Build Artifacts
@@ -71,8 +95,8 @@ jobs:
         with:
           name: dist-artifacts
           path: ./dist
-      - name: Deploy to ${{ (github.ref_name == 'master' && 'PRD') || (github.ref_name == 'release' && 'UAT') || (github.ref_name == 'develop' && 'SIT') }}
+      - name: Deploy to ${{ env.TARGET_ENV }}
         run: |
-          echo "Deploying to ${{ (github.ref_name == 'master' && 'PRD') || (github.ref_name == 'release' && 'UAT') || (github.ref_name == 'develop' && 'SIT') }}..."
-          echo "Using variable: ${{ vars.LOWEST_APP_VERSION }}"
-          echo "Using secret: ${{ secrets.REDIS_TOKEN }}"
+          echo "Deploying to ${{ env.TARGET_ENV }}..."
+          echo "Using variable LOWEST_APP_VERSION: ${{ vars.LOWEST_APP_VERSION }}"
+          echo "Using secret REDIS_TOKEN: ${{ secrets.REDIS_TOKEN }}"
