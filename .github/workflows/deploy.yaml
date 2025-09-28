@@ -59,13 +59,13 @@ jobs:
     uses: ./.github/workflows/prepare-target.yml
     needs: build
 
-  simulate_failure:
-    name: Simulate Failure
-    needs: prepare
-    runs-on: ubuntu-latest
-    steps:
-      - name: Simulate a failure step
-        run: exit 1
+  # simulate_failure:
+  #   name: Simulate Failure
+  #   needs: prepare
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Simulate a failure step
+  #       run: exit 1
 
   deploy:
     name: Deploy to GitHub Pages
@@ -94,10 +94,10 @@ jobs:
           echo "Using variable LOWEST_APP_VERSION: ${{ vars.LOWEST_APP_VERSION }}"
           echo "Using secret REDIS_TOKEN: ${{ secrets.REDIS_TOKEN }}"
 
-  notify_failure:
-    name: Notify on Failure
-    needs: [build, prepare, simulate_failure]
-    if: failure()
+  notify:
+    name: Notify
+    needs: [build, prepare]
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Send failure notification to Discord
@@ -107,4 +107,9 @@ jobs:
           DISCORD_WEBHOOK: https://discord.com/api/webhooks/1421697869458706533/W2UqZa7gD95EU7ixa4gQN3QLz3pWc3oFepvpv16XWxfpuMMTTiqbNULZWrBBmPfPlYBY
           REPO_NAME: ${{ github.repository }}
         with:
-          args: "The deployment workflow for ${{ env.REPO_NAME }} has failed."
+          args: >-
+            ${{
+              (needs.build.result == 'success' && needs.prepare.result == 'success' && needs.deploy.result == 'success')
+              && 'The deployment workflow for has succeeded.'
+              || 'The deployment workflow for has failed.'
+            }}
