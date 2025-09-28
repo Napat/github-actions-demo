@@ -1,6 +1,11 @@
 name: Prepare TARGET_ENV (reusable)
 on:
-  workflow_call: {}
+  workflow_call:
+    inputs:
+      ref_name:
+        required: false
+        type: string
+        description: "Optional branch/ref name to compute TARGET_ENV for"
 
 jobs:
   prepare:
@@ -11,12 +16,17 @@ jobs:
       - name: Compute TARGET_ENV
         id: set-target
         run: |
-          echo "Computing TARGET_ENV for ref: $GITHUB_REF_NAME"
-          if [[ "$GITHUB_REF_NAME" == "master" ]]; then
+          # Prefer workflow_call input.ref_name when provided, otherwise use runner-provided GITHUB_REF_NAME
+          REF_NAME="${{ inputs.ref_name }}"
+          if [ -z "$REF_NAME" ]; then
+            REF_NAME="$GITHUB_REF_NAME"
+          fi
+          echo "Computing TARGET_ENV for ref: $REF_NAME"
+          if [[ "$REF_NAME" == "master" ]]; then
             echo "target=PRD" >> $GITHUB_OUTPUT
-          elif [[ "$GITHUB_REF_NAME" == "release" ]]; then
+          elif [[ "$REF_NAME" == "release" ]]; then
             echo "target=UAT" >> $GITHUB_OUTPUT
-          elif [[ "$GITHUB_REF_NAME" == "develop" ]]; then
+          elif [[ "$REF_NAME" == "develop" ]]; then
             echo "target=SIT" >> $GITHUB_OUTPUT
           else
             echo "target=" >> $GITHUB_OUTPUT

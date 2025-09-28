@@ -58,6 +58,8 @@ jobs:
     name: Prepare TARGET_ENV (reusable)
     uses: ./.github/workflows/prepare-target.yml
     needs: build
+    with:
+      ref_name: ${{ github.ref_name }}
 
   deploy:
     name: Deploy to GitHub Pages
