@@ -1,0 +1,35 @@
+name: Deploy React CSR
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v5
+      - name: Install and Cache
+        uses: ./.github/actions/install-cache
+      - name: Build
+        run: bun run build
+      - name: List dist/
+        run: ls dist
+      - name: Upload dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-folder
+          path: dist/
+
+  deploy:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-folder
+          path: dist
+      - name: Deploy
+        run: echo "Deploying..."
