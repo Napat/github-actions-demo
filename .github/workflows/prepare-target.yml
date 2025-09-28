@@ -6,6 +6,10 @@ on:
         required: false
         type: string
         description: "Optional branch/ref name to compute TARGET_ENV for"
+    outputs:
+      TARGET_ENV:
+        description: "The calculated target environment (PRD, UAT, SIT)"
+        value: ${{ jobs.prepare.outputs.TARGET_ENV }}
 
 jobs:
   prepare:
