@@ -67,21 +67,6 @@ jobs:
       - name: Simulate a failure step
         run: exit 1
 
-  notify_failure:
-    name: Notify on Failure
-    needs: [build, prepare, simulate_failure]
-    if: failure()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send failure notification to Discord
-        uses: Ilshidur/action-discord@master
-        env:
-          #DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          DISCORD_WEBHOOK: https://discord.com/api/webhooks/1421697869458706533/W2UqZa7gD95EU7ixa4gQN3QLz3pWc3oFepvpv16XWxfpuMMTTiqbNULZWrBBmPfPlYBY
-          REPO_NAME: ${{ github.repository }}
-        with:
-          args: "R00 The deployment workflow has failed. "
-
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
@@ -108,3 +93,18 @@ jobs:
           echo "Deploying to ${{ env.TARGET_ENV }}..."
           echo "Using variable LOWEST_APP_VERSION: ${{ vars.LOWEST_APP_VERSION }}"
           echo "Using secret REDIS_TOKEN: ${{ secrets.REDIS_TOKEN }}"
+
+  notify_failure:
+    name: Notify on Failure
+    needs: [build, prepare, simulate_failure]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send failure notification to Discord
+        uses: Ilshidur/action-discord@master
+        env:
+          #DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_WEBHOOK: https://discord.com/api/webhooks/1421697869458706533/W2UqZa7gD95EU7ixa4gQN3QLz3pWc3oFepvpv16XWxfpuMMTTiqbNULZWrBBmPfPlYBY
+          REPO_NAME: ${{ github.repository }}
+        with:
+          args: "The deployment workflow for ${{ env.REPO_NAME }} has failed."
