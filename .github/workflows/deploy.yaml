@@ -59,6 +59,29 @@ jobs:
     uses: ./.github/workflows/prepare-target.yml
     needs: build
 
+  simulate_failure:
+    name: Simulate Failure
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simulate a failure step
+        run: exit 1
+
+  notify_failure:
+    name: Notify on Failure
+    needs: [build, prepare, simulate_failure]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send failure notification to Discord
+        uses: Ilshidur/action-discord@master
+        env:
+          #DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_WEBHOOK: https://discord.com/api/webhooks/1421697869458706533/W2UqZa7gD95EU7ixa4gQN3QLz3pWc3oFepvpv16XWxfpuMMTTiqbNULZWrBBmPfPlYBY
+          REPO_NAME: ${{ github.repository }}
+        with:
+          args: "R00 The deployment workflow has failed. "
+
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
