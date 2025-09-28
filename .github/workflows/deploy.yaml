@@ -62,7 +62,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
-    needs: [build, prepare]
+    needs: prepare
 
     # job นี้ทำงานเฉพาะเมื่อ prepare คืนค่า TARGET_ENV ที่ไม่ว่าง
     if: needs.prepare.outputs.TARGET_ENV != ''

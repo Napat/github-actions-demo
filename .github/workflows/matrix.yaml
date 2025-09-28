@@ -6,9 +6,27 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [16, 18]
         os: [ubuntu-latest, windows-latest, macos-latest]
         browser: [chrome, firefox, safari]
+        exclude:
+          - node: 16
+            os: macos-latest
+            browser: safari
+          - node: 18
+            os: ubuntu-latest
+            browser: safari
+        include:
+          - node: 20
+            os: ubuntu-latest
+            browser: chrome
+          - node: 20
+            os: windows-latest
+            browser: firefox
+          - node: 22
+            os: macos-latest
+            browser: safari
+
     steps:
       - name: Simulate Print node version, os, browser
         run: 'echo "Node: ${{ matrix.node }}, OS: ${{ matrix.os }}, Browser: ${{ matrix.browser }}"'
