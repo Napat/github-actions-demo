@@ -59,14 +59,6 @@ jobs:
     uses: ./.github/workflows/prepare-target.yml
     needs: build
 
-  # simulate_failure:
-  #   name: Simulate Failure
-  #   needs: prepare
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Simulate a failure step
-  #       run: exit 1
-
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
@@ -96,20 +88,18 @@ jobs:
 
   notify:
     name: Notify
-    needs: [build, prepare]
+    needs: [build, prepare, deploy]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Send failure notification to Discord
+      - name: Send notification to Discord
         uses: Ilshidur/action-discord@master
-        env:
-          #DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          DISCORD_WEBHOOK: https://discord.com/api/webhooks/1421697869458706533/W2UqZa7gD95EU7ixa4gQN3QLz3pWc3oFepvpv16XWxfpuMMTTiqbNULZWrBBmPfPlYBY
-          REPO_NAME: ${{ github.repository }}
         with:
           args: >-
-            ${{
+            ${{ 
               (needs.build.result == 'success' && needs.prepare.result == 'success' && needs.deploy.result == 'success')
-              && 'The deployment workflow for has succeeded.'
-              || 'The deployment workflow for has failed.'
+              && format('✅ Deployment workflow has succeeded.', github.repository, github.ref)
+              || format('❌ Deployment workflow has failed or was skipped.', github.repository, github.ref)
             }}
+        env:
+          DISCORD_WEBHOOK: https://discord.com/api/webhooks/1421697869458706533/W2UqZa7gD95EU7ixa4gQN3QLz3pWc3oFepvpv16XWxfpuMMTTiqbNULZWrBBmPfPlYBY
