@@ -96,6 +96,7 @@ jobs:
           name: dist-artifacts
           path: ./dist
       - name: Deploy to ${{ env.TARGET_ENV }}
+        if: github.ref == 'refs/heads/master'
         run: |
           echo "Deploying to ${{ env.TARGET_ENV }}..."
           echo "Using variable LOWEST_APP_VERSION: ${{ vars.LOWEST_APP_VERSION }}"
