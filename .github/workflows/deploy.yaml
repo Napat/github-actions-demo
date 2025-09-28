@@ -55,25 +55,9 @@ jobs:
           path: ./dist
 
   prepare:
-    name: Prepare TARGET_ENV
-    runs-on: ubuntu-latest
+    name: Prepare TARGET_ENV (reusable)
+    uses: ./.github/workflows/prepare-target.yml
     needs: build
-    outputs:
-      TARGET_ENV: ${{ steps.set-target.outputs.target }}
-    steps:
-      - name: Compute TARGET_ENV
-        id: set-target
-        run: |
-          echo "Computing TARGET_ENV for ref: $GITHUB_REF_NAME"
-          if [[ "$GITHUB_REF_NAME" == "master" ]]; then
-            echo "target=PRD" >> $GITHUB_OUTPUT
-          elif [[ "$GITHUB_REF_NAME" == "release" ]]; then
-            echo "target=UAT" >> $GITHUB_OUTPUT
-          elif [[ "$GITHUB_REF_NAME" == "develop" ]]; then
-            echo "target=SIT" >> $GITHUB_OUTPUT
-          else
-            echo "target=" >> $GITHUB_OUTPUT
-          fi
 
   deploy:
     name: Deploy to GitHub Pages
