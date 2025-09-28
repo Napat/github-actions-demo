@@ -80,7 +80,6 @@ jobs:
           name: dist-artifacts
           path: ./dist
       - name: Deploy to ${{ env.TARGET_ENV }}
-        if: github.ref == 'refs/heads/master'
         run: |
           echo "Deploying to ${{ env.TARGET_ENV }}..."
           echo "Using variable LOWEST_APP_VERSION: ${{ vars.LOWEST_APP_VERSION }}"
@@ -92,14 +91,16 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Send notification to Discord
-        uses: Ilshidur/action-discord@master
-        with:
-          args: >-
-            ${{ 
-              (needs.build.result == 'success' && needs.prepare.result == 'success' && needs.deploy.result == 'success')
-              && format('✅ Deployment workflow has succeeded.', github.repository, github.ref)
-              || format('❌ Deployment workflow has failed or was skipped.', github.repository, github.ref)
-            }}
-        env:
-          DISCORD_WEBHOOK: https://discord.com/api/webhooks/1421697869458706533/W2UqZa7gD95EU7ixa4gQN3QLz3pWc3oFepvpv16XWxfpuMMTTiqbNULZWrBBmPfPlYBY
+      - name: Echo notify
+        run: echo "Notifying stakeholders..."
+      # - name: Send notification to Discord
+      #   uses: Ilshidur/action-discord@master
+      #   with:
+      #     args: >-
+      #       ${{
+      #         (needs.build.result == 'success' && needs.prepare.result == 'success' && needs.deploy.result == 'success')
+      #         && format('✅ Deployment workflow has succeeded.', github.repository, github.ref)
+      #         || format('❌ Deployment workflow has failed or was skipped.', github.repository, github.ref)
+      #       }}
+      #   env:
+      #     DISCORD_WEBHOOK: https://discord.com/api/webhooks/1421697869458706533/W2UqZa7gD95EU7ixa4gQN3QLz3pWc3oFepvpv16XWxfpuMMTTiqbNULZWrBBmPfPlYBY
